@@ -1,0 +1,22 @@
+{
+  "name": "b3sh",
+  "version": "1.0.0",
+  "description": "bish bash bosh shell wrapper",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bish",
+    "bash",
+    "bosh",
+    "shell",
+    "linux",
+    "wrapper"
+  ],
+  "author": "jub3i",
+  "license": "MIT",
+  "dependencies": {
+    "terminal-kit": "^0.10.4"
+  }
+}
