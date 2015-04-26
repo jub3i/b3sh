@@ -2,8 +2,11 @@
 
 let term = require('./lib/termkit.js')(process);
 
-let bbb = {
+//TODO: options processing, should be require()'d in from config file
+let b = {
   currentLine: '',
+  posInCurrentLine: 0,
+  isActive: true,
 };
 
 if (!term.isTTY()) {
@@ -11,53 +14,112 @@ if (!term.isTTY()) {
   process.exit(1);
 }
 
-term.setWindowTitle('b3sh v0.1');
+term.setWindowTitle('b4sh v0.1');
 
-term.listen((key) => {
-  //TODO: this part should be middleware based?
-  //ctrl-c
-  if (key === '03') {
-    term.write(key + ' | ');
-    process.exit();
+term.listen(listenFn);
+
+function listenFn(hex) {
+  //TODO: eventually ditch ctrl-f and ctrl-d, just pass hex to
+  //lineEditor() here
+
   //ctrl-f
-  } else if (key === '06') {
-    term.write(key + ' | ');
+  if (hex === '06') {
+    term.write(hex + ' | ');
     launchVim();
     term.write('\n');
   //ctrl-d
-  } else if (key === '04') {
-    term.write(key + ' | ');
+  } else if (hex === '04') {
+    term.write(hex + ' | ');
     launchTmux();
     term.write('\n');
-  //enter
-  } else if (key === '0d') {
-    execLine();
+  //anything else
   } else {
-    lineEditor(key);
+    lineEditor(hex);
   }
-  return;
-});
+}
 
 drawPrompt();
 
 function lineEditor(hex) {
-  let key = hex2String(hex);
-  if (key === 'DEL') {
-    bbb.currentLine = bbb.currentLine.slice(0, bbb.currentLine.length - 1);
-    term.sendEscChar('BACKSPACE');
+  //TODO: this part should be configurable, loaded via require() or something
+  let key = hex2key(hex);
+
+  //TODO: this part should be middleware based?
+  //cb(key, updateDisplayCB, updateCurrentLineCB, next)
+  if (key === 'CTRL_C') {
+    term.setLastStatusCode(1);
+    b.currentLine = '';
+    b.posInCurrentLine = '';
+    drawPrompt();
+  } else if (key === 'CR') {
+    execLine(b.currentLine);
+  } else if (key === 'DEL') {
+    if (b.posInCurrentLine > 0) {
+      b.currentLine = b.currentLine.slice(0, b.currentLine.length - 1);
+      term.sendEscChar('BACKSPACE');
+      b.posInCurrentLine -= 1;
+    }
+  } else if (key === 'LEFT') {
+    if (b.posInCurrentLine > 0) {
+      term.sendEscChar('CURSOR_LEFT');
+      b.posInCurrentLine -= 1;
+    }
+  } else if (key === 'RIGHT') {
+    if (b.posInCurrentLine < b.currentLine.length) {
+      term.sendEscChar('CURSOR_RIGHT');
+      b.posInCurrentLine += 1;
+    }
   } else {
-    bbb.currentLine += key;
-    term.write(key);
+    if (b.posInCurrentLine === b.currentLine.length) {
+      b.currentLine += key;
+      term.sendEscChar('NORMAL_MODE');
+      term.write(key);
+    } else {
+      b.currentLine = b.currentLine.slice(0, b.posInCurrentLine) +
+        key +
+        b.currentLine.slice(b.posInCurrentLine);
+      term.sendEscChar('INSERT_MODE');
+      term.write(key);
+    }
+    b.posInCurrentLine += 1;
   }
 }
 
-function execLine() {
+//TODO: this should be middleware based, specified in config file and
+//require()'d in
+function execLine(line) {
   term.sendEscChar('NEWLINE');
-  term.write(bbb.currentLine);
-  bbb.currentLine = '';
+  term.write(b.currentLine);
+  term.sendEscChar('NEWLINE');
+
+  if (line === 'exit') {
+    return process.exit(0);
+  } else if (line === '') {
+    b.currentLine = '';
+    b.posInCurrentLine = 0;
+    term.setLastStatusCode(0);
+    drawPrompt();
+    return;
+  }
+
+  /*
+  //NOTE: async childSpawn can be laggy in tmux. dunno why .. ?
+  term.stopListen();
+  term.childSpawn(line, [], () => {
+    term.listen(listenFn);
+    b.currentLine = '';
+    b.posInCurrentLine = 0;
+    drawPrompt();
+  });
+  */
+
+  term.childSpawnSync(line, []);
+  b.currentLine = '';
+  b.posInCurrentLine = 0;
   drawPrompt();
 }
 
+//TODO: this should be configurable in options
 function drawPrompt() {
   term.sendEscChar('NEWLINE');
   term.write('$ [' + term.getLastStatusCode() + '] > ');
@@ -79,19 +141,18 @@ function launchTmux() {
 }
 
 function launchBashCommand() {
-  //term.childSpawnSync('tmux', ['new', '-s', 'asdf']);
   term.childSpawnSync('bash', ['-c', 'tmux new -s asdf']);
   drawPrompt();
 }
 
 //TODO: this should be configurable, basically how does your shell
 //map the hex inputs to a key
-function hex2String(hex) {
+function hex2key(hex) {
   switch (hex) {
     case '00': return 'NUL'; //Null char
     case '01': return 'SOH'; //Start of Heading
     case '02': return 'STX'; //Start of Text
-    case '03': return 'ETX'; //End of Text
+    case '03': return 'CTRL_C'; //End of Text //ESC
     case '04': return 'EOT'; //End of Transmission
     case '05': return 'ENQ'; //Enquiry
     case '06': return 'ACK'; //Acknowledgment
@@ -216,6 +277,13 @@ function hex2String(hex) {
     case '7d': return '}'; //Closing brace
     case '7e': return '~'; //Equivalency sign - tilde
     case '7f': return 'DEL'; //Delete
+    case '1b5b41': return 'UP'; //Up arrow
+    case '1b5b42': return 'DOWN'; //Down arrow
+    case '1b5b44': return 'LEFT'; //Down arrow
+    case '1b5b43': return 'RIGHT'; //Down arrow
+
+    //leave this in, handy for prompting you to improve your keymap when
+    //you hit a key thats not known
     default: return 'UNKNOWN(' + hex + ')';
   }
 }
