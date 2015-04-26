@@ -16,7 +16,5 @@
   ],
   "author": "jub3i",
   "license": "MIT",
-  "dependencies": {
-    "terminal-kit": "^0.10.4"
-  }
+  "dependencies": {}
 }

@@ -1,3 +1,43 @@
-basic prompt
-basic command matching
-test out launching subprocess of vim/tmux etc
+#key ideas
+
+is what im writing modular?
+    - is it composable?
+    - is is small and self contained?
+
+#what is a shell?
+
+1) PROMPT_DISPLAY_FN -> draw cool stuff
+2) LINE_EDITOR_FN -> read input as hex -> decide what input means -> decide (a) how to display LINE_STRING and (b) how to record a LINE_STRING
+3) LINE_EXECUTOR_FN -> decide what to do with the LINE_STRING -> when done then PROMPT_DISPLAY_FN
+
+x) some sort of configuration reader to specify functions (1) -> (3)
+x) i really want it to be a stream. is it a stream? how could it be a stream?
+x) can the functions above actually be streams?
+    - the shell process itself has 3 streams, stdin/out/err
+    - the shell
+         pipe PROMPT_DISPLAY_FN to stdout
+         and then on PROMPT_DISPLAY_FN 'end' pipes stdin to LINE_EDITOR_FN
+         and then on LINE_EDITOR_FN 'end' pipes to LINE_EXECUTOR
+         and then on LINE_EXECUTOR 'end' pipe to stdout
+         and then on stdout 'end' pipe PROMPT_DISPLAY_FN to stdout
+    - this is more of an async.waterfall() than a stream?
+
+#how does a shell 'flow' like a stream?
+
+(*) display prompt
+(*) line editor mode
+(*) line executor mode
+(?) results display mode, display whatevers coming out of the launched process (display from stdout/stderr),
+    hmm not so much, if you exec another program, then another proc is in control so yeah dont worry about this?
+(*) display prompt
+
+x) so a shell is basically an async.waterfall() run forever, or until LINE_EXECUTOR decides a line means exit
+x) or maybe its a one time thing that you can pipe a LINE_STRING into and then you get some output?
+
+#what is a shell not?
+
+a fucking scripting language
+    - bash is nice, cause its everywhere, but.. node.js is nutzz$$$ y0lo#sweg
+    - umm LINE_EXECUTOR decides what the shell is, so it *could* be a scripting language
+    - like it could be an IDE if you specify the LINE_EDITOR and LINE_EXECUTOR to behave like an IDE
+
