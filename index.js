@@ -43,7 +43,7 @@ drawPrompt();
 function lineEditor(hex) {
   let key = hex2String(hex);
   if (key === 'DEL') {
-    bbb.currentLine = bbb.currentLine.slice(0, bbb.currentLine.length - 2);
+    bbb.currentLine = bbb.currentLine.slice(0, bbb.currentLine.length - 1);
     term.sendEscChar('BACKSPACE');
   } else {
     bbb.currentLine += key;
@@ -54,6 +54,7 @@ function lineEditor(hex) {
 function execLine() {
   term.sendEscChar('NEWLINE');
   term.write(bbb.currentLine);
+  bbb.currentLine = '';
   drawPrompt();
 }
 
