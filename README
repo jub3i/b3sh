@@ -1,3 +1,5 @@
+#bish bash bosh shell (b3sh)
+
 #key ideas
 
 is what im writing modular?
@@ -17,9 +19,9 @@ x) can the functions above actually be streams?
     - the shell
          pipe PROMPT_DISPLAY_FN to stdout
          and then on PROMPT_DISPLAY_FN 'end' pipes stdin to LINE_EDITOR_FN
-         and then on LINE_EDITOR_FN 'end' pipes to LINE_EXECUTOR
+         and then on LINE_EDITOR_FN 'end_line_editor' pipes to LINE_EXECUTOR
          and then on LINE_EXECUTOR 'end' pipe to stdout
-         and then on stdout 'end' pipe PROMPT_DISPLAY_FN to stdout
+         and then on LINE_EXECUTOR 'end_piping_stdout' pipe PROMPT_DISPLAY_FN to stdout
     - this is more of an async.waterfall() than a stream?
 
 #how does a shell 'flow' like a stream?

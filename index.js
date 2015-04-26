@@ -14,7 +14,7 @@ if (!term.isTTY()) {
 term.setWindowTitle('b3sh v0.1');
 
 term.listen((key) => {
-  //console.log(key);
+  //TODO: this part should be middleware based?
   //ctrl-c
   if (key === '03') {
     term.write(key + ' | ');
