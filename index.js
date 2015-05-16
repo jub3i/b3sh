@@ -2,11 +2,9 @@
 
 let term = require('./lib/termkit.js')(process);
 
-//TODO: options processing, should be require()'d in from config file
-let b = {
+let shellState = {
   currentLine: '',
   posInCurrentLine: 0,
-  isActive: true,
 };
 
 if (!term.isTTY()) {
@@ -14,74 +12,63 @@ if (!term.isTTY()) {
   process.exit(1);
 }
 
+term.onResize((h, w) => {
+  term.write(`screen size has changed to ${h} x ${w} \(height x width\)!\n`);
+});
+
 term.setWindowTitle('b4sh v0.1');
 
 term.listen(listenFn);
 
-function listenFn(hex) {
-  //TODO: eventually ditch ctrl-f and ctrl-d, just pass hex to
-  //lineEditor() here
-
-  //ctrl-f
-  if (hex === '06') {
-    term.write(hex + ' | ');
-    launchVim();
-    term.write('\n');
-  //ctrl-d
-  } else if (hex === '04') {
-    term.write(hex + ' | ');
-    launchTmux();
-    term.write('\n');
-  //anything else
-  } else {
-    lineEditor(hex);
-  }
-}
-
 drawPrompt();
+
+function listenFn(hex) {
+  lineEditor(hex);
+}
 
 function lineEditor(hex) {
   //TODO: this part should be configurable, loaded via require() or something
   let key = hex2key(hex);
 
   //TODO: this part should be middleware based?
-  //cb(key, updateDisplayCB, updateCurrentLineCB, next)
+  //cb(key, shellState, term, execLine next)
   if (key === 'CTRL_C') {
     term.setLastStatusCode(1);
-    b.currentLine = '';
-    b.posInCurrentLine = '';
+    shellState.currentLine = '';
+    shellState.posInCurrentLine = '';
     drawPrompt();
   } else if (key === 'CR') {
-    execLine(b.currentLine);
+    execLine(shellState.currentLine);
   } else if (key === 'DEL') {
-    if (b.posInCurrentLine > 0) {
-      b.currentLine = b.currentLine.slice(0, b.currentLine.length - 1);
+    if (shellState.posInCurrentLine > 0) {
+      shellState.currentLine = shellState.currentLine.slice(0, shellState.currentLine.length - 1);
       term.sendEscChar('BACKSPACE');
-      b.posInCurrentLine -= 1;
+      shellState.posInCurrentLine -= 1;
     }
   } else if (key === 'LEFT') {
-    if (b.posInCurrentLine > 0) {
+    if (shellState.posInCurrentLine > 0) {
       term.sendEscChar('CURSOR_LEFT');
-      b.posInCurrentLine -= 1;
+      shellState.posInCurrentLine -= 1;
     }
   } else if (key === 'RIGHT') {
-    if (b.posInCurrentLine < b.currentLine.length) {
+    if (shellState.posInCurrentLine < shellState.currentLine.length) {
       term.sendEscChar('CURSOR_RIGHT');
-      b.posInCurrentLine += 1;
+      shellState.posInCurrentLine += 1;
     }
   } else {
-    if (b.posInCurrentLine === b.currentLine.length) {
-      b.currentLine += key;
+    if (shellState.posInCurrentLine === shellState.currentLine.length) {
+      shellState.currentLine += key;
       term.sendEscChar('NORMAL_MODE');
       term.write(key);
     } else {
-      b.currentLine = b.currentLine.slice(0, b.posInCurrentLine) +
+      shellState.currentLine =
+        shellState.currentLine.slice(0, shellState.posInCurrentLine) +
         key +
-        b.currentLine.slice(b.posInCurrentLine);
+        shellState.currentLine.slice(shellState.posInCurrentLine);
       term.sendEscChar('INSERT_MODE');
       term.write(key);
     }
-    b.posInCurrentLine += 1;
+    shellState.posInCurrentLine += 1;
   }
 }
 
@@ -89,34 +76,35 @@ function lineEditor(hex) {
 //require()'d in
 function execLine(line) {
   term.sendEscChar('NEWLINE');
-  term.write(b.currentLine);
+
+  //TODO: remove this is debug stuff
+  term.write(shellState.currentLine);
   term.sendEscChar('NEWLINE');
 
+  //TODO: this part should be middleware based?
+  //cb(key, shellState, term, next)
   if (line === 'exit') {
     return process.exit(0);
-  } else if (line === '') {
-    b.currentLine = '';
-    b.posInCurrentLine = 0;
+  }
+
+  if (line === '') {
+    shellState.currentLine = '';
+    shellState.posInCurrentLine = 0;
     term.setLastStatusCode(0);
     drawPrompt();
     return;
   }
 
-  /*
-  //NOTE: async childSpawn can be laggy in tmux. dunno why .. ?
-  term.stopListen();
   term.childSpawn(line, [], () => {
-    term.listen(listenFn);
-    b.currentLine = '';
-    b.posInCurrentLine = 0;
+    shellState.currentLine = '';
+    shellState.posInCurrentLine = 0;
     drawPrompt();
   });
-  */
 
-  term.childSpawnSync(line, []);
-  b.currentLine = '';
-  b.posInCurrentLine = 0;
-  drawPrompt();
+  //term.childSpawnSync(line, []);
+  //shellState.currentLine = '';
+  //shellState.posInCurrentLine = 0;
+  //drawPrompt();
 }
 
 //TODO: this should be configurable in options
@@ -124,10 +112,6 @@ function drawPrompt() {
   term.sendEscChar('NEWLINE');
   term.write('$ [' + term.getLastStatusCode() + '] > ');
 }
-
-term.onResize((h, w) => {
-  term.write(`screen size has changed to ${h} x ${w} \(height x width\)!\n`);
-});
 
 function launchVim() {
   term.childSpawnSync('vim', []);
