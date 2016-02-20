@@ -2,6 +2,8 @@
 
 let term = require('./lib/termkit.js')(process);
 
+console.log(process);
+
 let shellState = {
   currentLine: '',
   posInCurrentLine: 0,
@@ -16,7 +18,7 @@ term.onResize((h, w) => {
   term.write(`screen size has changed to ${h} x ${w} \(height x width\)!\n`);
 });
 
-term.setWindowTitle('b4sh v0.1');
+term.setWindowTitle('bbbsh v0.1');
 
 term.listen(listenFn);
 
@@ -78,8 +80,8 @@ function execLine(line) {
   term.sendEscChar('NEWLINE');
 
   //TODO: remove this is debug stuff
-  term.write(shellState.currentLine);
-  term.sendEscChar('NEWLINE');
+  //term.write(shellState.currentLine);
+  //term.sendEscChar('NEWLINE');
 
   //TODO: this part should be middleware based?
   //cb(key, shellState, term, next)
@@ -95,38 +97,29 @@ function execLine(line) {
     return;
   }
 
-  term.childSpawn(line, [], () => {
+  if (line === 'test') {
+    term.childSpawn('nodejs', ['/home/jubei/projects/nodejs/experiments/b3sh/test.js'], (err) => {
+      shellState.currentLine = '';
+      shellState.posInCurrentLine = 0;
+      drawPrompt();
+    });
+    return;
+  }
+
+  term.childSpawn(line, [], (err) => {
+    if (err) {
+      term.write(err.toString());
+    }
     shellState.currentLine = '';
     shellState.posInCurrentLine = 0;
     drawPrompt();
   });
-
-  //term.childSpawnSync(line, []);
-  //shellState.currentLine = '';
-  //shellState.posInCurrentLine = 0;
-  //drawPrompt();
 }
 
 //TODO: this should be configurable in options
 function drawPrompt() {
   term.sendEscChar('NEWLINE');
   term.write('$ [' + term.getLastStatusCode() + '] > ');
-}
-
-function launchVim() {
-  term.childSpawnSync('vim', []);
-  drawPrompt();
-}
-
-function launchTmux() {
-  //term.childSpawnSync('tmux', ['new', '-s', 'asdf']);
-  term.childSpawnSync('bash', ['-c', 'tmux new -s asdf']);
-  drawPrompt();
-}
-
-function launchBashCommand() {
-  term.childSpawnSync('bash', ['-c', 'tmux new -s asdf']);
-  drawPrompt();
 }
 
 //TODO: this should be configurable, basically how does your shell
@@ -271,3 +264,21 @@ function hex2key(hex) {
     default: return 'UNKNOWN(' + hex + ')';
   }
 }
+
+//debug
+process.on('error', () => {
+  console.log('event:error');
+  //console.log(arguments);
+});
+
+//debug
+process.on('close', () => {
+  console.log('event:close');
+  //console.log(arguments);
+});
+
+//debug
+process.on('exit', () => {
+  console.log('event:exit');
+  //console.log(arguments);
+});

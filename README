@@ -1,4 +1,4 @@
-#b1sh b4sh b0sh shell (b4sh)
+#b1sh b4sh b0sh shell (140sh)
 
 #key ideas
 
@@ -40,6 +40,10 @@ x) or maybe its a one time thing that you can pipe a LINE_STRING into and then y
 
 a fucking scripting language
     - bash is nice, cause its everywhere, but.. node.js is nutzz$$$ y0lo#sweg
-    - umm LINE_EXECUTOR decides what the shell is, so it *could* be a scripting language
-    - like it could be an IDE if you specify the LINE_EDITOR and LINE_EXECUTOR to behave like an IDE
+    - maybe LINE_EXECUTOR decides what the shell is, so it *could* be a scripting language
+    - like it could be an IDE for example, if you specify the LINE_EDITOR and LINE_EXECUTOR to behave like an IDE
 
+
+#todo
+- native c/c++ add on for execve() ?
+- roll with the punches, write little modules to run programs as needed
