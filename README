@@ -11,14 +11,18 @@ to get pty.js to compile with `n` version 5.7.1:
 
 1) `/home/jubei/stor/NODEJS/bin/npm i node-gyp`
 
-this install `node-gyp` to `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js`
+this installs `node-gyp` to `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js`
 
 2) edit `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js`
 
 `#!/home/jubei/NODEJS/n/versions/node/5.7.1/bin/node` instead of:
 `#!/usr/bin/env node`
 
-3) in ./node_modules/pty.js/ run `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js rebuild`
+3) `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js install 5.7.1`
+
+installs node@5.7.1 src files to `~/.node-gyp/5.7.1/`
+
+4) in `./node_modules/pty.js/` run `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js rebuild`
 
 #key ideas
 

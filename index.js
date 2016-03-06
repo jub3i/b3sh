@@ -2,8 +2,6 @@
 
 let term = require('./lib/termkit.js')(process);
 
-console.log(process);
-
 let shellState = {
   currentLine: '',
   posInCurrentLine: 0,
@@ -116,7 +114,7 @@ function execLine(line) {
     return;
   }
 
-  term.childSpawn(line, [], (err) => {
+  term.ptyChildSpawn(line, [], (err) => {
     if (err) {
       term.write(err.toString());
     }
@@ -124,6 +122,15 @@ function execLine(line) {
     shellState.posInCurrentLine = 0;
     drawPrompt();
   });
+
+  //term.childSpawn(line, [], (err) => {
+  //  if (err) {
+  //    term.write(err.toString());
+  //  }
+  //  shellState.currentLine = '';
+  //  shellState.posInCurrentLine = 0;
+  //  drawPrompt();
+  //});
 }
 
 //TODO: this should be configurable in options
