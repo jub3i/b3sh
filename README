@@ -1,5 +1,25 @@
 #b1sh b4sh b0sh shell (140sh)
 
+#usage
+
+from zsh: `n use 5.4.0 index.js`
+from gnome-terminal: `/home/jubei/NODEJS/n/versions/node/5.4.0/bin/node /home/jubei/projects/nodejs/experiments/b3sh/index.js`
+
+#pty.js
+
+to get pty.js to compile with `n` version 5.7.1:
+
+1) `/home/jubei/stor/NODEJS/bin/npm i node-gyp`
+
+this install `node-gyp` to `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js`
+
+2) edit `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js`
+
+`#!/home/jubei/NODEJS/n/versions/node/5.7.1/bin/node` instead of:
+`#!/usr/bin/env node`
+
+3) in ./node_modules/pty.js/ run `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js rebuild`
+
 #key ideas
 
 is what im writing modular?
@@ -46,4 +66,5 @@ a fucking scripting language
 
 #todo
 - native c/c++ add on for execve() ?
+    - https://github.com/chjj/pty.js ??
 - roll with the punches, write little modules to run programs as needed

@@ -16,5 +16,7 @@
   ],
   "author": "jub3i",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "pty.js": "^0.3.0"
+  }
 }

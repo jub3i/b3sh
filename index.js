@@ -106,6 +106,16 @@ function execLine(line) {
     return;
   }
 
+  if (line === 'tty') {
+    console.log(process.stdout.isTTY);
+    console.log(process.stdin.isTTY);
+    console.log(process.stderr.isTTY);
+    shellState.currentLine = '';
+    shellState.posInCurrentLine = 0;
+    drawPrompt();
+    return;
+  }
+
   term.childSpawn(line, [], (err) => {
     if (err) {
       term.write(err.toString());
