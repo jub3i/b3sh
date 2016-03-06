@@ -3,11 +3,13 @@
 #usage
 
 from zsh: `n use 5.4.0 index.js`
-from gnome-terminal: `/home/jubei/NODEJS/n/versions/node/5.4.0/bin/node /home/jubei/projects/nodejs/experiments/b3sh/index.js`
+from gnome-terminal:
+    Edit > View > Profiles... -> Select Profile > Edit > Title and Command > Custom Command
+    `/home/jubei/NODEJS/n/versions/node/5.4.0/bin/node /home/jubei/projects/nodejs/experiments/b3sh/index.js`
 
 #pty.js
 
-to get pty.js to compile with `n` version 5.7.1:
+to use `n use 5.7.1`, get pty.js to compile with nodejs version 5.7.1:
 
 1) `/home/jubei/stor/NODEJS/bin/npm i node-gyp`
 
@@ -66,9 +68,3 @@ a fucking scripting language
     - bash is nice, cause its everywhere, but.. node.js is nutzz$$$ y0lo#sweg
     - maybe LINE_EXECUTOR decides what the shell is, so it *could* be a scripting language
     - like it could be an IDE for example, if you specify the LINE_EDITOR and LINE_EXECUTOR to behave like an IDE
-
-
-#todo
-- native c/c++ add on for execve() ?
-    - https://github.com/chjj/pty.js ??
-- roll with the punches, write little modules to run programs as needed
