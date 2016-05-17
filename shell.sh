@@ -6,4 +6,4 @@
 
 
 #export N_PREFIX=$HOME/NODEJS
-/home/jubei/NODEJS/n/versions/node/5.4.0/bin/node --harmony_arrow_functions ~/projects/nodejs/experiments/b3sh/index.js
+/home/jubei/NODEJS/n/versions/node/6.1.0/bin/node ~/projects/nodejs/experiments/b3sh/index.js

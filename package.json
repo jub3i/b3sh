@@ -1,7 +1,7 @@
 {
   "name": "b3sh",
   "version": "1.0.0",
-  "description": "bish bash bosh shell wrapper",
+  "description": "bish bash bosh shell",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,8 +11,7 @@
     "bash",
     "bosh",
     "shell",
-    "linux",
-    "wrapper"
+    "linux"
   ],
   "author": "jub3i",
   "license": "MIT",

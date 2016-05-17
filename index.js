@@ -36,6 +36,7 @@ function lineEditor(hex) {
     term.setLastStatusCode(1);
     shellState.currentLine = '';
     shellState.posInCurrentLine = '';
+    term.sendEscChar('NEWLINE');
     drawPrompt();
   } else if (key === 'CR') {
     execLine(shellState.currentLine);
@@ -77,10 +78,6 @@ function lineEditor(hex) {
 function execLine(line) {
   term.sendEscChar('NEWLINE');
 
-  //TODO: remove this is debug stuff
-  //term.write(shellState.currentLine);
-  //term.sendEscChar('NEWLINE');
-
   //TODO: this part should be middleware based?
   //cb(key, shellState, term, next)
   if (line === 'exit') {
@@ -95,26 +92,10 @@ function execLine(line) {
     return;
   }
 
-  if (line === 'test') {
-    term.childSpawn('nodejs', ['/home/jubei/projects/nodejs/experiments/b3sh/test.js'], (err) => {
-      shellState.currentLine = '';
-      shellState.posInCurrentLine = 0;
-      drawPrompt();
-    });
-    return;
-  }
+  let args = line.split(' ');
+  let command = args.shift();
 
-  if (line === 'tty') {
-    console.log(process.stdout.isTTY);
-    console.log(process.stdin.isTTY);
-    console.log(process.stderr.isTTY);
-    shellState.currentLine = '';
-    shellState.posInCurrentLine = 0;
-    drawPrompt();
-    return;
-  }
-
-  term.ptyChildSpawn(line, [], (err) => {
+  term.ptyChildSpawn(command, args, (err) => {
     if (err) {
       term.write(err.toString());
     }
@@ -135,7 +116,6 @@ function execLine(line) {
 
 //TODO: this should be configurable in options
 function drawPrompt() {
-  term.sendEscChar('NEWLINE');
   term.write('$ [' + term.getLastStatusCode() + '] > ');
 }
 

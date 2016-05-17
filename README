@@ -26,6 +26,10 @@ installs node@5.7.1 src files to `~/.node-gyp/5.7.1/`
 
 4) in `./node_modules/pty.js/` run `~/NODEJS/lib/node_modules/node-gyp/bin/node-gyp.js rebuild`
 
+5) to use `n use 6.0.0` edit `./node_modules/pty.js/package.json`:
+
+    bump nan from version `2.0.5` to `2.2.0`
+
 #key ideas
 
 is what im writing modular?
